@@ -42,6 +42,14 @@ public class FileDownloadRandomAccessFile implements FileDownloadOutputStream {
 
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
+        //TODO duanmeng
+        Log.e("DM", "write byte[]'s length:" + b.length + " off:" + off + " len:" + len);
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         out.write(b, off, len);
     }
 
