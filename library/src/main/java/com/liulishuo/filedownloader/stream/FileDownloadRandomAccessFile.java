@@ -33,16 +33,37 @@ public class FileDownloadRandomAccessFile implements FileDownloadOutputStream {
     private final BufferedOutputStream out;
     private final FileDescriptor fd;
     private final RandomAccessFile randomAccess;
+    private static final int MAX_BYTES_PER_SECOND = 100 * 1024; //上限100kb/s
+    private long blockStartTime;
+    private int writeCount;
 
     FileDownloadRandomAccessFile(File file) throws IOException {
         randomAccess = new RandomAccessFile(file, "rw");
         fd = randomAccess.getFD();
         out = new BufferedOutputStream(new FileOutputStream(randomAccess.getFD()));
+        blockStartTime = System.currentTimeMillis();
+        writeCount = 0;
     }
 
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
         out.write(b, off, len);
+        
+        //Edit duanmeng
+        writeCount += len;
+        if (writeCount >= MAX_BYTES_PER_SECOND){
+            long currentTime = System.currentTimeMillis();
+            long sleepTime = blockStartTime + 1000 - currentTime;
+            if (sleepTime > 0){
+                try {
+                    Thread.sleep(sleepTime);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            writeCount = 0;
+            blockStartTime = currentTime + sleepTime;
+        }
     }
 
     @Override
